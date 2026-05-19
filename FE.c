@@ -5,6 +5,7 @@
 #include "WeaponLvl.h"
 #include "Character.h"
 #include "Class.h"
+#include "wrenNative.h"
 UnitClass classes[256];
 static void gen_screen(GtkApplication *app){
 }
@@ -18,6 +19,11 @@ static void activate(GtkApplication *app, gpointer user_data){
 }
 int main(int argc, char **argv){
   GtkApplication *app;
+  WrenConfiguration config;
+  wrenInitConfiguration(&config);
+  config.loadModuleFn = &loadModule;
+  config.bindForeignMethodFn = &bindForeignMethod;
+  config.bindForeignClassFn = &bindForeignClass;
   int status;
   app = gtk_application_new("com.EmacsIsBetterThanVi.FireEmblemMaker", G_APPLICATION_DEFAULT_FLAGS);
   g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);

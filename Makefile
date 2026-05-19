@@ -9,14 +9,18 @@ help:
 %.o: %.c
 	@gcc -c $(OPTS) $< -o $@
 
-prog: $(OFILES) 
-	@gcc $(OPTS) -o FireEmblemMaker *.o $(shell pkg-config --libs gtk4)
+libwren:
+	@make -C wren/projects/make/ wren
+
+prog: $(OFILES) libwren
+	@gcc $(OPTS) -o FireEmblemMaker *.o wren/lib/libwren.a $(shell pkg-config --libs gtk4) -lm 
 
 wayland: OPTS+=$(shell pkg-config --cflags gtk4-wayland)
 wayland: prog
 
 x11: OPTS+=$(shell pkg-config --cflags gtk4-x11)
-x11: cfg prog
+x11: prog
 
-clean: 
+clean:
 	@rm -rf *.o FireEmblemMaker *~
+	@make -C wren/projects/make/ clean
