@@ -1,3 +1,4 @@
 *.o
 FireEmblemMaker
 .ccls-cache/
+.idea/

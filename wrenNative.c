@@ -1,4 +1,4 @@
-#include "wrenNative.h"
+#include "wrenFireEmblem/wrenNative.h"
 #include "wrenFireEmblem/FEClass.h"
 WrenLoadModuleResult loadModule(WrenVM* vm, const char* name){
   WrenLoadModuleResult result = {0};

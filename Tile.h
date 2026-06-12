@@ -6,8 +6,8 @@ typedef struct __attribute__((__packed__)) {
   unsigned int TenthCells: 4;
 } moveCost; 
 typedef struct {
-  char Avo, Def, Res; // Added Avoid, Defense, and Resistance, signed
-  char HP; // Percent Change in HP, signed
+  signed char Avo, Def, Res; // Added Avoid, Defense, and Resistance, signed
+  signed char HP; // Percent Change in HP, signed
   moveCost moveCosts[16];
 } Tile;
 #endif

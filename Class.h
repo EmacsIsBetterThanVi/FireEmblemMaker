@@ -7,7 +7,7 @@ typedef struct __attribute__((__packed__)) {
   unsigned int IgnoreNegative: 1;
 } MoveType;
 extern MoveType moveTypes[16];
-typedef struct UnitClass {
+typedef struct __attribute__((__packed__)) UnitClass {
   unsigned char MaxHP;
   unsigned char str;
   unsigned char mag;
@@ -53,5 +53,9 @@ typedef struct UnitClass {
   unsigned char MaxAuthorityLvl;
   unsigned char MaxDaggerLvl;
   MoveType moveType; // [2: Reserved][4: Move type][1: Ignore Positive Tile Effects][1: Ignore Negative Tile Effects]
+  unsigned char type; // Used for effective weapons. Just 8 independent flags.
+  unsigned int relativePower:3; // Used in Exp calculations
+  unsigned int classBonus: 4; // Used in Exp calculations, real value is 10 times this number
+  unsigned int thief:1; // Used in Exp calculations, and other places.x
 } UnitClass;
 #endif
