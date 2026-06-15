@@ -1,9 +1,21 @@
-#include "wrenFireEmblem/wrenNative.h"
-#include "wrenFireEmblem/FEClass.h"
+#include "wrenNative.h"
+#include "FEClass.h"
+#include <stdio.h>
+#include "FE.h"
+void loadModuleComplete(WrenVM* vm, const char* name, struct WrenLoadModuleResult result){
+    if (result.source == NULL) return;
+    free((void*)result.source);
+}
+static char * loadFile(const char* name){
+    // TODO: implement module loading
+}
+void runVM(){
+
+}
 WrenLoadModuleResult loadModule(WrenVM* vm, const char* name){
   WrenLoadModuleResult result = {0};
-  result.source="";
-  // TODO: implement module loading
+  result.source = loadFile(name);
+  if (result.source) result.onComplete = loadModuleComplete;
   return result;
 }
 WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, const char* className, bool isStatic, const char* signature){

@@ -5,4 +5,5 @@
 WrenLoadModuleResult loadModule(WrenVM* vm, const char* name);
 WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, const char* className, bool isStatic, const char* signature);
 WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* className);
+void runVM();
 #endif
