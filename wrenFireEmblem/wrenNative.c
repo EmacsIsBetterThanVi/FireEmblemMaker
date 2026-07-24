@@ -9,8 +9,14 @@ void loadModuleComplete(WrenVM* vm, const char* name, struct WrenLoadModuleResul
 static char * loadFile(const char* name){
     // TODO: implement module loading
 }
+void wrenLoadScreen(const char* name){
+    char * file = calloc(strlen(name)+6, sizeof(char));
+    strcpy(file, name);
+    strcat(file, ".wren");
+    WrenInterpretResult result = wrenInterpret(vm, name, loadFile(file));
+}
 void runVM(){
-
+    WrenInterpretResult result = wrenInterpret(vm, "init", loadFile("init.wren"));
 }
 WrenLoadModuleResult loadModule(WrenVM* vm, const char* name){
   WrenLoadModuleResult result = {0};
@@ -20,6 +26,7 @@ WrenLoadModuleResult loadModule(WrenVM* vm, const char* name){
 }
 WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, const char* className, bool isStatic, const char* signature){
   if (strcmp(module, "FireEmblem")) {
+      if (strcmp(className, "FEClass")) return FEClassBindForeign(vm, isStatic, signature);
   } 
 }
 WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* className){
@@ -27,7 +34,8 @@ WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const c
   if (strcmp(module, "FireEmblem")) {
     if (strcmp(className, "FEClass")) {
       methods.allocate = &FEClassAllocater;
-    } else {
+      methods.finalize = &FEClassFinalizer;
+    } else { // TODO: Additional foreign class bindings required.
       methods.allocate = NULL;
       methods.finalize = NULL;
     }

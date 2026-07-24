@@ -17,6 +17,7 @@
 #include "allegro5/allegro_font.h"
 #include "allegro5/allegro_audio.h"
 #include "allegro5/allegro_image.h"
+
 // Fire Emblem objects
 UnitClass classes[256];
 Character * characters;
@@ -43,12 +44,15 @@ static char keyConfig[10] = {ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_LEFT,
 const char * keyNames[10] = {"Up", "Down", "Left", "Right", "Select", "Cancel", "Next", "Info", "Map", "Info Windows"};
 unsigned char keys[ALLEGRO_KEY_MAX];
 bool cfgmod = false;
+
+// Constants
 const unsigned char version = 0b00001000; // Linear version number as MM.mmm.rrr, used to prevent bugs.
 const char versionString[6] = {'0'+(version>>6), '.', '0'+((version>>3)&8), '.', '0'+(version&8), 0};
 #define KS_UP 0
 #define KS_DOWN 1
 #define KS_JUST_DOWN 3
 #define KS_JUST_UP 2
+
 void save_cfg(){
     ALLEGRO_CONFIG* cfg = al_create_config();
     char* tmp = calloc(10, sizeof(char));
@@ -101,6 +105,10 @@ static void draw_screen(){
             al_draw_text(dfont, menuC[SLC_X==1], 240*scale, (120*scale)+10, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "New Project");
             al_draw_text(dfont, menuC[SLC_X==2], 240*scale, (120*scale)+20, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "Run Project");
             al_draw_text(dfont, menuC[SLC_X==3], 240*scale, (120*scale)+30, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "Options");
+            break;
+        case ST_OPTIONS:
+
+            break;
         case ST_EDITOR_CODE:
             break;
     }
