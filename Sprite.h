@@ -16,6 +16,6 @@ typedef struct {
 Sprite* new_sprite(char * name);
 // The game will auto generate sprites for each character from char_{char name}_field.json, and char_{char name}_battle.json. If the game can not find a field or battle sprite, it will default to the unit's class.
 // It will also auto generate sprites for each tile from tile_{tile_name}_field.png and tile_{tile_name}_battle.png
-void sprite_draw(Sprite sprite);
+void sprite_draw(Sprite* sprite);
 #define SPRITE_H
 #endif

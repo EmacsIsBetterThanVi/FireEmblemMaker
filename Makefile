@@ -26,7 +26,10 @@ targets:
 	@echo "    deps            - Lists all dependencies"
 	@echo "    font            - Fetches font dependencies"
 
-assets/engine/remote/font.ttf:
+assets/engine/remote/:
+	@mkdir assets/engine/remote
+
+assets/engine/remote/font.ttf: assets/engine/remote/
 	@wget https://ftp.gnu.org/gnu/freefont/freefont-ttf-20100919.tar.gz
 	@tar -xf freefont-ttf-20100919.tar.gz freefont-20100919/FreeSerif.ttf -O > assets/engine/remote/font.ttf
 	@rm -f freefont-ttf-20100919.tar.gz
@@ -70,7 +73,7 @@ cleanWren:
 	@make -C wren/projects/make/ clean
 
 cleanRemote:
-	@rm -rf assets/engine/remote/*
+	@rm -rf assets/engine/remote
 
 cleanAll: clean cleanWren cleanAllegro cleanRemote
 

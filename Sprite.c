@@ -1,5 +1,5 @@
   // TODO: Implement new_sprite. A file named {name}.json must exist, and contains the inforamtion about the sprite, notably image width, hight, frame file names, and animation data. 
-#include "sprite.h"
+#include "Sprite.h"
 #include "FE.h"
 #include "wrenFireEmblem/wrenNative.h"
 #include "wren/src/include/wren.h"
@@ -15,5 +15,5 @@ void sprite_draw(Sprite* sprite){
     sprite->frameN+=1;
     wrenEnsureSlots(vm, 1);
     wrenSetSlotHandle(vm, 0, sprite->object);
-    wrenCall(vm, sprite->animations[animation]);
+    wrenCall(vm, sprite->animations[sprite->animation]);
 }

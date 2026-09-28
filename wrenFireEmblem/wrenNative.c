@@ -1,7 +1,8 @@
 #include "wrenNative.h"
 #include "FEClass.h"
+#include "FECore.h"
 #include <stdio.h>
-#include "FE.h"
+#include "../FE.h"
 void loadModuleComplete(WrenVM* vm, const char* name, struct WrenLoadModuleResult result){
     if (result.source == NULL) return;
     free((void*)result.source);
@@ -27,6 +28,7 @@ WrenLoadModuleResult loadModule(WrenVM* vm, const char* name){
 WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, const char* className, bool isStatic, const char* signature){
   if (strcmp(module, "FireEmblem")) {
       if (strcmp(className, "FEClass")) return FEClassBindForeign(vm, isStatic, signature);
+      if (strcmp(className, "FECore")) return FECoreBindForeign(vm, isStatic, signature);
   } 
 }
 WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* className){
@@ -35,6 +37,9 @@ WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const c
     if (strcmp(className, "FEClass")) {
       methods.allocate = &FEClassAllocater;
       methods.finalize = &FEClassFinalizer;
+    } else if (strcmp(className, "FECore")){
+        methods.allocate = &FECoreAllocater;
+        methods.finalize = &FECoreFinalizer;
     } else { // TODO: Additional foreign class bindings required.
       methods.allocate = NULL;
       methods.finalize = NULL;
