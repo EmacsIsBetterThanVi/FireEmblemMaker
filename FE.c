@@ -17,6 +17,7 @@
 #include "allegro5/allegro_font.h"
 #include "allegro5/allegro_audio.h"
 #include "allegro5/allegro_image.h"
+ #include "allegro5/allegro_ttf.h"
 
 // Fire Emblem objects
 UnitClass classes[256];
@@ -24,6 +25,8 @@ Character * characters;
 static char assetsPath[64];
 char projectPath[64];
 // Allegro objects
+ALLEGRO_BITMAP* fontScale;
+ALLEGRO_BITMAP* fontBase;
 ALLEGRO_FONT* dfont;
 ALLEGRO_DISPLAY* disp;
 ALLEGRO_EVENT_QUEUE* equeue;
@@ -46,13 +49,12 @@ unsigned char keys[ALLEGRO_KEY_MAX];
 bool cfgmod = false;
 
 // Constants
-const unsigned char version = 0b00001000; // Linear version number as MM.mmm.rrr, used to prevent bugs.
+const unsigned char version = 0b00001001; // Linear version number as MM.mmm.rrr, used to prevent bugs.
 const char versionString[6] = {'0'+(version>>6), '.', '0'+((version>>3)&8), '.', '0'+(version&8), 0};
 #define KS_UP 0
 #define KS_DOWN 1
 #define KS_JUST_DOWN 3
 #define KS_JUST_UP 2
-
 void save_cfg(){
     ALLEGRO_CONFIG* cfg = al_create_config();
     char* tmp = calloc(10, sizeof(char));
@@ -75,11 +77,9 @@ void draw(ALLEGRO_BITMAP* bm, int x, int y, int flags){
 static void must_init(bool test, const char *description)
 {
     if(test) return;
-
     printf("Initialization failed while loading %s\n", description);
     exit(1);
 }
-
 char * assetPath(const char * name,  enum Scope scope){
     char * path = calloc(64, sizeof(char));
     if (scope==SC_local){
@@ -97,17 +97,27 @@ static void draw_screen(){
     switch (gstate){
         case ST_TITLE:
             al_draw_text(dfont, al_map_rgb(255, 255, 255), 120*scale, 120*scale, ALLEGRO_ALIGN_CENTRE|ALLEGRO_ALIGN_INTEGER, "Press any key to start");
-            al_draw_text(dfont, al_map_rgb(255, 255, 255), 240*scale, 156*scale, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, versionString);
+            al_draw_text(dfont, al_map_rgb(255, 255, 255), 240*scale, 152*scale, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, versionString);
             break;
         case ST_TITLE_MENU:
-            al_draw_text(dfont, al_map_rgb(255, 255, 255), 240*scale, 156*scale, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, versionString);
-            al_draw_text(dfont, menuC[SLC_X==0], 240*scale, 120*scale, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "Open Project");
-            al_draw_text(dfont, menuC[SLC_X==1], 240*scale, (120*scale)+10, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "New Project");
-            al_draw_text(dfont, menuC[SLC_X==2], 240*scale, (120*scale)+20, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "Run Project");
-            al_draw_text(dfont, menuC[SLC_X==3], 240*scale, (120*scale)+30, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "Options");
+            al_draw_text(dfont, al_map_rgb(255, 255, 255), 240*scale, 152*scale, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, versionString);
+            al_draw_text(dfont, menuC[SLC_X==0], 240*scale, 100*scale, ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "Open Project");
+            al_draw_text(dfont, menuC[SLC_X==1], 240*scale, (110*scale), ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "New Project");
+            al_draw_text(dfont, menuC[SLC_X==2], 240*scale, (120*scale), ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "Run Project");
+            al_draw_text(dfont, menuC[SLC_X==3], 240*scale, (130*scale), ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "Options");
+            al_draw_text(dfont, menuC[SLC_X==4], 240*scale, (140*scale), ALLEGRO_ALIGN_RIGHT|ALLEGRO_ALIGN_INTEGER, "Quit");
             break;
         case ST_OPTIONS:
-
+            char* tmp = calloc(30, sizeof(char));
+            al_draw_text(dfont, menuC[SLC_X==-1], 120*scale, 20*scale, ALLEGRO_ALIGN_CENTRE|ALLEGRO_ALIGN_INTEGER, "Menu");
+            al_draw_text(dfont, menuC[SLC_X==1], 120*scale, 40*scale, ALLEGRO_ALIGN_CENTRE|ALLEGRO_ALIGN_INTEGER, "Reset Key Config");
+            sprintf(tmp, "Display Scale: %d", scale);
+            al_draw_text(dfont, menuC[SLC_X==0], 120*scale, 30*scale, ALLEGRO_ALIGN_CENTRE|ALLEGRO_ALIGN_INTEGER, tmp);
+            for (int i=0; i<10; i++){
+                sprintf(tmp, "%s Key: %s", keyNames[i], al_keycode_to_name(keyConfig[i]));
+                al_draw_text(dfont, menuC[SLC_X==(i+2)], 120*scale, (50+10*i)*scale, ALLEGRO_ALIGN_CENTRE|ALLEGRO_ALIGN_INTEGER, tmp);
+            }
+            free(tmp);
             break;
         case ST_EDITOR_CODE:
             break;
@@ -163,6 +173,10 @@ bool load_screen(enum State state){
                 vm = wrenNewVM(&config);
             }
             break;
+        case ST_OPTIONS:
+            load_bg(assetPath("MenuBG.png", SC_engine));
+            SLC_X=0;
+            break;
     }
     pstate=gstate;
     gstate=state;
@@ -202,10 +216,12 @@ static void game_logic(){
                     case 3:
                         load_screen(ST_OPTIONS);
                         break;
+                    case 4:
+                        done=true;
                 }
             }
             if (key_press(keyConfig[0],  KS_JUST_DOWN) && SLC_X>0) SLC_X--;
-            if (key_press(keyConfig[1],  KS_JUST_DOWN) && SLC_X<3) SLC_X++;
+            if (key_press(keyConfig[1],  KS_JUST_DOWN) && SLC_X<4) SLC_X++;
             break;
         case ST_LOAD_PROJECT:
             if (key_press(keyConfig[5], KS_JUST_DOWN)) load_screen(ST_TITLE);
@@ -215,6 +231,33 @@ static void game_logic(){
             break;
         case ST_EDITOR:
             if (projectPath[0]==0) load_screen(ST_LOAD_PROJECT);
+            break;
+        case ST_OPTIONS:
+            if (key_press(keyConfig[5], KS_JUST_DOWN)) load_screen(ST_TITLE);
+            if (key_press(keyConfig[0],  KS_JUST_DOWN) && SLC_X>-1) SLC_X--;
+            if (key_press(keyConfig[1],  KS_JUST_DOWN) && SLC_X<11) SLC_X++;
+            if (key_press(keyConfig[2], KS_JUST_DOWN) && scale>1 && SLC_X==0) {
+                scale--;
+                al_resize_display(disp, 240*scale, 160*scale);
+                dfont=al_load_ttf_font(assetPath("remote/font.ttf", SC_engine), 8*scale,ALLEGRO_TTF_MONOCHROME);
+            }
+            if (key_press(keyConfig[3], KS_JUST_DOWN) && scale<10 && SLC_X==0) {
+                scale++;
+                al_resize_display(disp, 240*scale, 160*scale);
+                dfont=al_load_ttf_font(assetPath("remote/font.ttf", SC_engine), 8*scale,ALLEGRO_TTF_MONOCHROME);
+            }
+            if (key_press(keyConfig[4], KS_JUST_DOWN) && SLC_X==-1) load_screen(ST_TITLE);
+            if (key_press(keyConfig[4], KS_JUST_DOWN) && SLC_X==1) {
+                char defaultConfig[10] = {ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_Z, ALLEGRO_KEY_X, ALLEGRO_KEY_C, ALLEGRO_KEY_A, ALLEGRO_KEY_S, ALLEGRO_KEY_D};
+                for (int i=0; i<10; i++){
+                    keyConfig[i]=defaultConfig[i];
+                }
+            }
+            if (SLC_X>1){
+                if (key_press(keyConfig[4], KS_JUST_DOWN) && keyConfig[SLC_X-2]!=0){
+                    keyConfig[SLC_X-2]=0;
+                }
+            }
             break;
     }
     if (key_press(ALLEGRO_KEY_ESCAPE, KS_JUST_DOWN)) {
@@ -285,9 +328,10 @@ int main(int argc, char **argv){
   disp = al_create_display(240*scale, 160*scale);
   must_init(disp, "[allegro display]");
   al_set_window_title(disp, "Fire Emblem Maker");
-  dfont = al_create_builtin_font();
-  must_init(dfont, "[allegro_addon builtin_font]");
   must_init(al_init_image_addon(), "[allegro_addon image]");
+  al_init_font_addon();
+  must_init(al_init_ttf_addon(), "[allegro_addon, ttf]");
+  must_init(dfont=al_load_ttf_font(assetPath("remote/font.ttf", SC_engine), 8*scale,ALLEGRO_TTF_MONOCHROME), "[font ttf_font]");
   al_register_event_source(equeue, al_get_keyboard_event_source());
   al_register_event_source(equeue, al_get_display_event_source(disp));
   al_register_event_source(equeue, al_get_timer_event_source(timer));
@@ -308,7 +352,10 @@ int main(int argc, char **argv){
             redraw = true;
             break;
         case ALLEGRO_EVENT_KEY_DOWN:
-            keys[event.keyboard.keycode] = KS_JUST_DOWN;
+            if (gstate==ST_OPTIONS && SLC_X>1)
+                if (keyConfig[SLC_X-2]==0) keyConfig[SLC_X-2] = event.keyboard.keycode;
+                else keys[event.keyboard.keycode] = KS_JUST_DOWN;
+            else keys[event.keyboard.keycode] = KS_JUST_DOWN;
             break;
         case ALLEGRO_EVENT_KEY_UP:
             keys[event.keyboard.keycode] = KS_JUST_UP;
